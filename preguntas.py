@@ -13,7 +13,6 @@ tbl0 = pd.read_csv("tbl0.tsv", sep="\t")
 tbl1 = pd.read_csv("tbl1.tsv", sep="\t")
 tbl2 = pd.read_csv("tbl2.tsv", sep="\t")
 
-
 def pregunta_01():
     """
     ¿Cuál es la cantidad de filas en la tabla `tbl0.tsv`?
@@ -22,8 +21,7 @@ def pregunta_01():
     40
 
     """
-    return
-
+    return len(tbl0.index)
 
 def pregunta_02():
     """
@@ -33,8 +31,7 @@ def pregunta_02():
     4
 
     """
-    return
-
+    return len(tbl0.columns)
 
 def pregunta_03():
     """
@@ -50,8 +47,8 @@ def pregunta_03():
     Name: _c1, dtype: int64
 
     """
-    return
-
+    aux = tbl0['_c1'].value_counts()
+    return aux.sort_index()
 
 def pregunta_04():
     """
@@ -65,8 +62,9 @@ def pregunta_04():
     E    4.785714
     Name: _c2, dtype: float64
     """
-    return
-
+    aux = tbl0.groupby('_c1', as_index=False)['_c2'].mean()
+    aux = aux.set_index('_c1') 
+    return aux['_c2'] 
 
 def pregunta_05():
     """
@@ -82,8 +80,9 @@ def pregunta_05():
     E    9
     Name: _c2, dtype: int64
     """
-    return
-
+    aux = tbl0.groupby('_c1', as_index=False)['_c2'].max()
+    aux = aux.set_index('_c1') 
+    return aux['_c2'] 
 
 def pregunta_06():
     """
@@ -93,9 +92,10 @@ def pregunta_06():
     Rta/
     ['A', 'B', 'C', 'D', 'E', 'F', 'G']
 
-    """
-    return
-
+    """ 
+    aux = tbl1._c4.unique() 
+    aux = [x.upper() for x in aux]
+    return sorted(aux) 
 
 def pregunta_07():
     """
@@ -110,8 +110,9 @@ def pregunta_07():
     E    67
     Name: _c2, dtype: int64
     """
-    return
-
+    aux = tbl0.groupby('_c1', as_index=False)['_c2'].sum()
+    aux = aux.set_index('_c1') 
+    return aux['_c2'] 
 
 def pregunta_08():
     """
@@ -128,8 +129,9 @@ def pregunta_08():
     39   39   E    5  1998-01-26    44
 
     """
-    return
-
+    aux  = tbl0.copy()
+    aux['suma'] = tbl0.apply(lambda x: x._c0 + x._c2, axis=1)
+    return aux
 
 def pregunta_09():
     """
@@ -146,8 +148,9 @@ def pregunta_09():
     39   39   E    5  1998-01-26  1998
 
     """
-    return
-
+    aux  = tbl0.copy()
+    aux['year'] = tbl0.apply(lambda x: x._c3.split('-')[0], axis=1)
+    return aux
 
 def pregunta_10():
     """
@@ -163,8 +166,11 @@ def pregunta_10():
     3   D                  1:2:3:5:5:7
     4   E  1:1:2:3:3:4:5:5:5:6:7:8:8:9
     """
-    return
-
+    aux = tbl0.copy() 
+    aux['_c2'] = tbl0.apply(lambda x: str(x._c2), axis=1) 
+    aux = aux.sort_values(by='_c2') 
+    aux = aux.groupby('_c1', as_index=False)['_c2'].apply(lambda x: ':'.join(x))  
+    return aux.set_index('_c1') 
 
 def pregunta_11():
     """
@@ -182,8 +188,9 @@ def pregunta_11():
     38   38      d,e
     39   39    a,d,f
     """
-    return
-
+    aux = tbl1.sort_values(by='_c4') 
+    aux = aux.groupby('_c0', as_index=False)['_c4'].apply(lambda x: ','.join(x)) 
+    return aux.sort_values(by='_c0') 
 
 def pregunta_12():
     """
@@ -200,8 +207,11 @@ def pregunta_12():
     38   38                    eee:0,fff:9,iii:2
     39   39                    ggg:3,hhh:8,jjj:5
     """
-    return
-
+    aux = tbl2.sort_values(by='_c5a') 
+    aux['_c5b'] = aux.apply(lambda x: str(x._c5b), axis=1)
+    aux['_c5'] = aux['_c5a'] + ':' + aux['_c5b']
+    aux['_c5'] =  aux.groupby('_c0')['_c5'].transform(lambda x: ','.join(x)) 
+    return aux[['_c0','_c5']].drop_duplicates().sort_values(by='_c0').reset_index(drop=True)
 
 def pregunta_13():
     """
@@ -217,4 +227,7 @@ def pregunta_13():
     E    275
     Name: _c5b, dtype: int64
     """
-    return
+    aux = pd.merge(left=tbl0,right=tbl2,on='_c0') 
+    aux = aux.groupby('_c1', as_index=False)['_c5b'].sum()
+    aux = aux.set_index('_c1')
+    return aux['_c5b'] 
